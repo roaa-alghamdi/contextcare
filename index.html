@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>ContextCare – STC Complaint Context Continuity Prototype</title>
+<style>
+:root{
+  --purple:#4F008C; --violet:#7B2FF7; --pink:#FF375E; --cyan:#00B8E6; --green:#1FA971; --amber:#F2A900; --red:#D62D4B; --blue:#1E6FD9;
+  --ink:#1B1030; --muted:#6B6280; --line:#E7E2F0; --bg:#F6F4FA; --card:#FFFFFF;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+button{font-family:inherit;cursor:pointer}
+.topbar{background:linear-gradient(100deg,#2B0052,#4F008C 55%,#7B2FF7);color:#fff;padding:14px 28px;display:flex;align-items:center;gap:18px;position:sticky;top:0;z-index:20}
+.brand{font-weight:800;font-size:22px;letter-spacing:.5px}
+.brand small{display:block;font-weight:400;font-size:11px;opacity:.8;letter-spacing:.3px}
+.switch{margin-left:auto;display:flex;background:rgba(255,255,255,.14);border-radius:30px;padding:4px}
+.switch button{border:0;background:transparent;color:#fff;padding:8px 18px;border-radius:30px;font-weight:600;font-size:13px}
+.switch button.on{background:#fff;color:var(--purple)}
+.demo{font-size:11px;opacity:.8;margin-left:10px}
+.wrap{max-width:1360px;margin:0 auto;padding:22px 28px 40px}
+.tabs{display:flex;gap:6px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:transparent;padding:10px 16px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;font-size:14px}
+.tabs button.on{color:var(--purple);border-color:var(--violet)}
+.grid{display:grid;gap:16px}
+.card{background:var(--card);border-radius:14px;box-shadow:0 2px 10px rgba(40,10,80,.06);padding:18px}
+.card h3{font-size:14px;color:var(--purple);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.kpis{grid-template-columns:repeat(6,1fr)}
+.kpi{padding:14px 16px;border-left:4px solid var(--violet)}
+.kpi .lbl{font-size:11.5px;color:var(--muted);min-height:30px}
+.kpi .val{font-size:28px;font-weight:800;color:var(--ink);margin-top:4px}
+.kpi .tgt{font-size:11px;color:var(--muted)}
+.pill{display:inline-block;white-space:nowrap;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;color:#fff}
+.p-red{background:var(--red)}.p-amber{background:var(--amber)}.p-green{background:var(--green)}.p-blue{background:var(--blue)}.p-violet{background:var(--violet)}.p-gray{background:#9A93A8}
+.search{display:flex;gap:10px;align-items:center}
+.search input,.search select{padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;min-width:260px;font-family:inherit}
+.btn{border:0;border-radius:10px;padding:10px 16px;font-weight:700;font-size:13px;color:#fff;background:var(--violet)}
+.btn.sec{background:#EFE9FB;color:var(--purple)}
+.btn.pink{background:var(--pink)}.btn.green{background:var(--green)}.btn.red{background:var(--red)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.status-strip{grid-template-columns:repeat(5,1fr)}
+.mini{background:#FBFAFE;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.mini .l{font-size:11px;color:var(--muted)}.mini .v{font-weight:700;font-size:15px;margin-top:3px}
+.two{grid-template-columns:1.05fr 2fr}
+.three{grid-template-columns:2fr 1fr}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.summary{background:linear-gradient(120deg,#F3ECFF,#FFF0F3);border-radius:12px;padding:14px 16px;border:1px solid #E6D9FF}
+.summary b{color:var(--purple)}
+.ai-tag{font-size:10.5px;font-weight:800;color:#fff;background:linear-gradient(90deg,var(--violet),var(--pink));border-radius:6px;padding:2px 7px}
+table{width:100%;border-collapse:collapse;font-size:12.8px}
+th{background:var(--purple);color:#fff;text-align:left;padding:8px 10px;font-weight:600}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr.click{cursor:pointer}tr.click:hover td{background:#F7F2FF}
+.timeline{position:relative;padding-left:22px}
+.timeline:before{content:"";position:absolute;left:7px;top:4px;bottom:4px;width:2px;background:var(--line)}
+.ev{position:relative;margin-bottom:14px}
+.ev:before{content:"";position:absolute;left:-20px;top:3px;width:12px;height:12px;border-radius:50%;background:var(--violet);border:2px solid #fff;box-shadow:0 0 0 2px var(--violet)}
+.ev.esc:before{background:var(--pink);box-shadow:0 0 0 2px var(--pink)}
+.ev.cust:before{background:var(--cyan);box-shadow:0 0 0 2px var(--cyan)}
+.ev .t{font-size:11.5px;color:var(--muted)}
+.ev .h{font-weight:700;margin:2px 0}
+.gauge{display:flex;flex-direction:column;align-items:center}
+.alert{border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:12.8px;display:flex;gap:10px;align-items:flex-start}
+.alert.c{background:#FFECEF;border-left:4px solid var(--red)}
+.alert.h{background:#FFF6E0;border-left:4px solid var(--amber)}
+.alert.i{background:#EAF6FF;border-left:4px solid var(--cyan)}
+.muted{color:var(--muted)}
+.hidden{display:none!important}
+.modal-bg{position:fixed;inset:0;background:rgba(20,5,40,.45);display:flex;align-items:center;justify-content:center;z-index:50}
+.modal{background:#fff;border-radius:16px;padding:22px;width:480px;max-width:92vw}
+.modal h4{color:var(--purple);margin-bottom:10px;font-size:17px}
+.modal label{font-size:12px;color:var(--muted);display:block;margin:10px 0 4px}
+.modal textarea,.modal select,.modal input{width:100%;padding:10px;border:1.5px solid var(--line);border-radius:10px;font-family:inherit;font-size:13px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-weight:600;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+/* ---------- customer phone ---------- */
+.cust-wrap{display:grid;grid-template-columns:420px 1fr;gap:28px;align-items:start}
+.phone{width:400px;background:#111;border-radius:44px;padding:14px;box-shadow:0 20px 50px rgba(40,0,80,.35);margin:0 auto}
+.screen{background:#F6F4FA;border-radius:32px;overflow:hidden;height:800px;display:flex;flex-direction:column}
+.app-head{background:linear-gradient(120deg,#4F008C,#7B2FF7);color:#fff;padding:22px 20px 18px}
+.app-head .nm{font-size:20px;font-weight:800}.app-head .sub{font-size:12px;opacity:.85}
+.app-body{padding:14px;overflow-y:auto;flex:1}
+.mcard{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(40,10,80,.06)}
+.banner{border-radius:14px;padding:14px;color:#fff;font-weight:700;margin-bottom:12px;font-size:14px}
+.banner small{display:block;font-weight:500;opacity:.92;margin-top:4px;font-size:12px}
+.b-green{background:var(--green)}.b-red{background:var(--red)}.b-blue{background:var(--blue)}
+.count{font-size:26px;font-weight:800}
+.stages{list-style:none}
+.stages li{display:flex;gap:10px;align-items:flex-start;padding:7px 0;font-size:13px}
+.dot{width:20px;height:20px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800}
+.d-done{background:var(--green)}.d-cur{background:var(--amber)}.d-late{background:var(--red)}.d-pend{background:#CFC9DA}
+.bar{height:10px;background:#ECE7F5;border-radius:10px;overflow:hidden}
+.bar span{display:block;height:100%;border-radius:10px}
+.stars{font-size:32px;letter-spacing:4px;cursor:pointer;user-select:none}
+.stars span{color:#D6D0E2;transition:.15s}
+.stars span.on{color:#FFB400}
+.mlist .itm{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.mlist .itm:last-child{border:0}
+.explain{line-height:1.55}
+.explain h3{margin-top:4px}
+.explain ul{padding-left:18px;margin:6px 0 12px}
+.explain li{margin-bottom:5px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.two,.three,.cust-wrap{grid-template-columns:1fr}.status-strip{grid-template-columns:repeat(2,1fr)}}
+
+.screen-page{min-height:calc(100vh - 68px)}
+.hero{background:radial-gradient(1200px 500px at 85% 10%,#7B2FF7 0%,transparent 60%),radial-gradient(800px 400px at 0% 100%,#FF375E55 0%,transparent 60%),linear-gradient(135deg,#1A0033,#3A0068 60%,#4F008C);color:#fff;padding:70px 28px 90px;position:relative;overflow:hidden}
+.hero .in{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.eyebrow{font-size:12px;letter-spacing:3px;font-weight:700;color:#7FE3FF;text-transform:uppercase}
+.hero h1{font-size:46px;line-height:1.12;margin:14px 0 16px;font-weight:800}
+.hero h1 span{background:linear-gradient(90deg,#FF7A93,#C9A2FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:16.5px;opacity:.88;line-height:1.6;max-width:600px}
+.cta{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
+.btn.lg{padding:14px 24px;font-size:15px;border-radius:12px}
+.btn.ghost{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35)}
+.hero-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:22px;backdrop-filter:blur(8px);box-shadow:0 30px 60px rgba(0,0,0,.35);transform:perspective(1100px) rotateY(-10deg) rotateX(4deg)}
+.hero-card .big{font-size:64px;font-weight:800;line-height:1}
+.hstats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.hstats div{background:rgba(255,255,255,.1);border-radius:12px;padding:10px 12px}
+.hstats b{font-size:22px;display:block}
+.hstats small{opacity:.8;font-size:11.5px}
+.section{max-width:1240px;margin:0 auto;padding:60px 28px 10px}
+.section h2{font-size:30px;color:var(--purple);margin-bottom:8px}
+.section .lead{color:var(--muted);font-size:15px;max-width:760px;margin-bottom:26px;line-height:1.6}
+.feat{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.feat .card{padding:22px;transition:.2s}
+.feat .card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(79,0,140,.15)}
+.ico{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;margin-bottom:12px}
+.feat h4{font-size:15.5px;margin-bottom:6px}
+.feat p{font-size:13px;color:var(--muted);line-height:1.5}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;counter-reset:s}
+.step{background:#fff;border-radius:14px;padding:20px;position:relative;box-shadow:0 2px 10px rgba(40,10,80,.06)}
+.step:before{counter-increment:s;content:counter(s);position:absolute;top:-14px;left:18px;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--pink));color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center}
+.step h4{margin:8px 0 6px;font-size:15px}.step p{font-size:13px;color:var(--muted);line-height:1.5}
+.portals{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.portal{border-radius:18px;padding:28px;color:#fff;position:relative;overflow:hidden}
+.portal h3{font-size:22px;margin-bottom:8px}
+.portal ul{margin:12px 0 20px 18px;font-size:14px;line-height:1.7;opacity:.95}
+.footer{background:#14002A;color:#CFC3E6;margin-top:60px;padding:34px 28px 24px;font-size:13px}
+.footer .in{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:30px}
+.footer h5{color:#fff;font-size:14px;margin-bottom:10px}
+.footer .copy{max-width:1240px;margin:22px auto 0;border-top:1px solid rgba(255,255,255,.12);padding-top:16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12px;color:#A99BC7}
+.login-wrap{min-height:calc(100vh - 68px);display:grid;grid-template-columns:1fr 1fr}
+.login-art{background:linear-gradient(135deg,#1A0033,#4F008C 60%,#7B2FF7);color:#fff;padding:60px;display:flex;flex-direction:column;justify-content:center}
+.login-art h2{font-size:34px;margin:10px 0 14px}
+.login-art p{opacity:.85;line-height:1.6;max-width:460px}
+.login-box{display:flex;align-items:center;justify-content:center;padding:40px}
+.lform{width:420px;max-width:100%}
+.lform h3{font-size:26px;color:var(--ink);margin-bottom:6px}
+.role{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:22px 0}
+.role button{border:2px solid var(--line);background:#fff;border-radius:14px;padding:16px;text-align:left;font-size:13px;color:var(--muted)}
+.role button b{display:block;color:var(--ink);font-size:15px;margin-bottom:2px}
+.role button.on{border-color:var(--violet);background:#F6F0FF}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px}
+.field input{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;font-size:14px;font-family:inherit}
+.field input:focus{outline:none;border-color:var(--violet)}
+.err{color:var(--red);font-size:12.5px;min-height:18px;margin-bottom:6px}
+.demo-acc{background:#F6F0FF;border-radius:12px;padding:12px 14px;font-size:12.5px;margin-top:16px;line-height:1.7}
+.demo-acc code{background:#fff;border-radius:6px;padding:1px 6px;font-weight:700;color:var(--purple);cursor:pointer}
+.user{display:flex;align-items:center;gap:10px;margin-left:14px}
+.avatar{width:36px;height:36px;border-radius:50%;background:#fff;color:var(--purple);font-weight:800;display:flex;align-items:center;justify-content:center}
+.user .nm{font-size:13px;font-weight:700;line-height:1.2}.user .rl{font-size:11px;opacity:.8}
+.navlinks{display:flex;gap:6px;margin-left:auto}
+.navlinks a{color:#fff;text-decoration:none;font-weight:600;font-size:13.5px;padding:8px 12px;border-radius:8px;opacity:.9}
+.navlinks a:hover{background:rgba(255,255,255,.12)}
+.notice{font-size:11px;text-align:center;color:var(--muted);margin-top:14px}
+@media(max-width:1000px){.hero .in,.login-wrap,.portals,.footer .in{grid-template-columns:1fr}.feat,.steps{grid-template-columns:1fr 1fr}.login-art{display:none}}
+
+.menu-btn{display:none;margin-left:auto;background:rgba(255,255,255,.14);border:0;color:#fff;font-size:20px;width:42px;height:42px;border-radius:10px}
+.proto-badge{font-size:10.5px;font-weight:700;letter-spacing:.5px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:4px 10px;margin-right:6px;align-self:center}
+@media(max-width:760px){
+  body{font-size:13.5px}
+  .topbar{padding:10px 14px;flex-wrap:wrap}
+  .brand{font-size:18px}.brand small{font-size:10px}
+  .menu-btn{display:block}
+  .navlinks{display:none!important;width:100%;flex-direction:column;align-items:stretch;margin:6px 0 2px}
+  body.menu-open .navlinks:not(.hidden){display:flex!important}
+  .navlinks a{padding:12px 10px}
+  .navlinks .btn{margin:4px 0 0!important}
+  .user{margin:6px 0}
+  .proto-badge{display:none}
+  .hero{padding:36px 18px 44px}
+  .hero h1{font-size:31px}
+  .hero p{font-size:14.5px}
+  .hero-card{transform:none;padding:18px}.hero-card .big{font-size:48px}
+  .cta .btn{flex:1;padding:14px 10px;font-size:14px;white-space:nowrap}
+  .section{padding:38px 18px 0}
+  .section h2{font-size:23px}
+  .feat,.steps{grid-template-columns:1fr}
+  .steps{gap:24px}
+  .portal{padding:22px}
+  .footer{padding:28px 18px 20px}
+  .login-box{padding:24px 18px;min-width:0}
+  .lform{width:100%}
+  .login-wrap{display:block}
+  .wrap{padding:14px 12px 30px}
+  .tabs{overflow-x:auto;white-space:nowrap}
+  .tabs button{padding:10px 12px;font-size:13px}
+  .search{flex-direction:column;align-items:stretch}
+  .search input{min-width:0}
+  .search span{display:none}
+  .status-strip{grid-template-columns:1fr 1fr}
+  .info{grid-template-columns:1fr}
+  .kpis{grid-template-columns:1fr 1fr}
+  .kpi .val{font-size:22px}
+  .card{padding:14px}
+  .card table{display:block;overflow-x:auto;white-space:nowrap}
+  .row{gap:8px}
+  .card .row .btn{flex:1}
+  /* customer: full-screen native app look */
+  .cust-wrap{display:block}
+  .phone{width:100%;background:none;padding:0;box-shadow:none;border-radius:0}
+  .screen{height:auto;border-radius:18px;box-shadow:0 6px 20px rgba(40,10,80,.10)}
+  .app-body{overflow:visible}
+  .cust-wrap .explain{margin-top:16px}
+  .modal{padding:18px}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand" style="cursor:pointer;display:flex;align-items:center;gap:10px" onclick="nav('home')"><svg width="34" height="34" viewBox="0 0 40 40" style="flex:none"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF375E"/><stop offset="1" stop-color="#7B2FF7"/></linearGradient></defs><rect width="40" height="40" rx="11" fill="url(#lg)"/><path d="M12 20a8 8 0 0 1 13.7-5.6" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="M28 20a8 8 0 0 1-13.7 5.6" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round"/><circle cx="20" cy="20" r="2.8" fill="#fff"/></svg><div>ContextCare
+    <small>STC case study · Academic prototype</small></div></div>
+  <button class="menu-btn" onclick="document.body.classList.toggle('menu-open')" aria-label="Menu">☰</button>
+  <div class="navlinks" id="navPublic">
+    <span class="proto-badge">ACADEMIC PROTOTYPE</span>
+    <a href="#" onclick="nav('home');return false">Home</a>
+    <a href="#" onclick="nav('home','features');return false">Solution</a>
+    <a href="#" onclick="nav('home','how');return false">How it works</a>
+    <button class="btn" style="background:#fff;color:var(--purple);margin-left:8px" onclick="nav('login')">Sign in</button>
+  </div>
+  <div class="navlinks hidden" id="navPrivate">
+    <div class="user"><div class="avatar" id="uAv">A</div><div><div class="nm" id="uNm"></div><div class="rl" id="uRl"></div></div></div>
+    <button class="btn ghost" style="margin-left:14px" onclick="logout()">Sign out</button>
+  </div>
+</div>
+
+<!-- ================= HOME ================= -->
+<div id="home" class="screen-page">
+  <section class="hero"><div class="in">
+    <div>
+      <div class="eyebrow">STC case study · MIS graduation project</div>
+      <h1>Every complaint keeps its <span>context</span> – wherever it goes.</h1>
+      <p>ContextCare is a prototype of our recommended solution: one reference number gives every employee the full story of a complaint, AI predicts escalation and routes it to the right team, and customers follow their complaint live in mystc.</p>
+      <div class="cta"><button class="btn pink lg" onclick="nav('employee')">Employee sign in</button><button class="btn ghost lg" onclick="nav('customer')">Customer sign in</button></div>
+    </div>
+    <div class="hero-card">
+      <div style="font-size:13px;opacity:.85">Complainants who experienced a break in context continuity</div>
+      <div class="big">73.8%</div><div style="font-size:12.5px;opacity:.8">138 of 187 survey participants who submitted a complaint</div>
+      <div class="hstats">
+        <div><b>60.1%</b><small>re-submitted information</small></div>
+        <div><b>52.9%</b><small>struggled with department transfers</small></div>
+        <div><b>47.8%</b><small>met staff unaware of past actions</small></div>
+        <div><b>45.7%</b><small>found the status unclear</small></div>
+      </div>
+    </div>
+  </div></section>
+
+  <div class="section" id="features">
+    <h2>One solution, two connected interfaces</h2>
+    <p class="lead">STC already gives every complaint a reference number. ContextCare makes that number carry the full context, adds AI decision support for staff, and shows customers the same live status.</p>
+    <div class="feat">
+      <div class="card"><div class="ico" style="background:var(--violet)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 7 20M17 4l-2 16M4 9h16M3 15h16"/></svg></div><h4>Reference-number lookup</h4><p>One number retrieves the complaint, the customer details and the full record – the customer never repeats information.</p></div>
+      <div class="card"><div class="ico" style="background:var(--pink)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></div><h4>AI complaint summary</h4><p>An automatic summary appears on the first screen, so any employee understands the issue in seconds.</p></div>
+      <div class="card"><div class="ico" style="background:var(--cyan)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg></div><h4>Smart routing &amp; risk</h4><p>AI predicts escalation risk, recommends the right department and suggests the next best action.</p></div>
+      <div class="card"><div class="ico" style="background:var(--green)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M12 9v3l2 1.5"/></svg></div><h4>Live tracker in mystc</h4><p>Customers see the stage and time remaining, get an SLA alert if overdue, escalate in one tap and rate the result.</p></div>
+    </div>
+  </div>
+
+  <div class="section" id="how">
+    <h2>How it works</h2>
+    <p class="lead">The same data feeds both interfaces, so what the customer sees always matches what the employee sees.</p>
+    <div class="steps">
+      <div class="step"><h4>Complaint submitted</h4><p>Through mystc, 900, chat or a branch. A reference number is issued instantly.</p></div>
+      <div class="step"><h4>Context captured</h4><p>Every action and transfer is logged; AI writes and updates the summary.</p></div>
+      <div class="step"><h4>AI decision support</h4><p>Escalation risk, routing and KPI alerts guide employees and managers.</p></div>
+      <div class="step"><h4>Customer stays informed</h4><p>Live status, time remaining, SLA alerts, escalation and a 1–5 star rating.</p></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="portals">
+      <div class="portal" style="background:linear-gradient(135deg,#4F008C,#7B2FF7)"><h3>Employee portal</h3><div style="opacity:.85">For customer service, complaints teams and supervisors</div>
+        <ul><li>Complaint 360° view with AI summary and full history</li><li>Transfer with context, add actions, resolve</li><li>Queue ranked by escalation risk with AI routing</li><li>Six KPIs, targets and AI management alerts</li></ul>
+        <button class="btn lg" style="background:#fff;color:var(--purple)" onclick="nav('employee')">Open employee portal</button></div>
+      <div class="portal" style="background:linear-gradient(135deg,#C2185B,#FF375E)"><h3>Customer · mystc</h3><div style="opacity:.85">For STC customers following up on a complaint</div>
+        <ul><li>Live progress and time remaining to resolution</li><li>SLA overdue alert with an apology</li><li>Escalate or contact technical support with the ticket number</li><li>Rate the resolution from 1 to 5 stars</li></ul>
+        <button class="btn lg" style="background:#fff;color:#C2185B" onclick="nav('customer')">Open mystc tracker</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= LOGIN ================= -->
+<div id="login" class="hidden">
+  <div class="login-wrap">
+    <div class="login-art">
+      <div class="eyebrow">ContextCare</div>
+      <h2>Sign in to continue</h2>
+      <p>Employees open the unified complaint dashboard. Customers open their complaint tracker in mystc. Both use the same complaint data.</p>
+    </div>
+    <div class="login-box"><div class="lform">
+      <h3>Sign in to the prototype</h3><div class="muted">Choose a role, then enter a sample ID or use quick demo</div>
+      <div class="role">
+        <button id="rEmp" class="on" onclick="setRole('emp')"><b>Employee</b>STC staff and supervisors</button>
+        <button id="rCus" onclick="setRole('cus')"><b>Customer</b>Track my complaint</button>
+      </div>
+      <div class="field"><label id="uLbl">Employee ID</label><input id="uName" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()"></div>
+            <div class="err" id="lErr"></div>
+      <button class="btn lg" style="width:100%" onclick="doLogin()">Continue</button>
+      <button class="btn sec lg" style="width:100%;margin-top:10px" onclick="quickDemo()">Quick demo – continue with a sample account</button>
+      <div class="demo-acc" id="demoAcc"></div>
+      <div class="notice">Academic prototype with sample data only. No real accounts or passwords are used, and this is not an official stc service.</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ================= EMPLOYEE ================= -->
+<div id="emp" class="wrap hidden">
+  <div class="tabs">
+    <button class="on" data-t="t360" onclick="tab(this)">Complaint 360° View</button>
+    <button data-t="tq" onclick="tab(this)">Complaint Queue &amp; AI Routing</button>
+    <button data-t="tk" onclick="tab(this)">KPIs &amp; AI Alerts</button>
+  </div>
+
+  <!-- 360 -->
+  <div id="t360">
+    <div class="card" style="margin-bottom:16px">
+      <div class="search">
+        <b style="color:var(--purple)">Enter complaint reference number</b>
+        <input id="ref" list="refs" placeholder="e.g. CMP-2026-004812" onkeydown="if(event.key==='Enter')lookup()">
+        <datalist id="refs"></datalist>
+        <button class="btn" onclick="lookup()">Retrieve complaint</button>
+        <span class="muted" style="margin-left:auto;font-size:12px">One number retrieves the full context – the customer never repeats information</span>
+      </div>
+    </div>
+    <div id="c360"></div>
+  </div>
+
+  <!-- queue -->
+  <div id="tq" class="hidden">
+    <div class="three grid">
+      <div class="card">
+        <h3>Open complaints ranked by AI escalation risk</h3>
+        <table><thead><tr><th>Reference</th><th>Issue</th><th>Current dept.</th><th>AI recommended dept.</th><th>Risk</th><th>SLA</th></tr></thead><tbody id="qBody"></tbody></table>
+        <p class="muted" style="font-size:12px;margin-top:8px">Click a row to open its 360° view.</p>
+      </div>
+      <div class="card">
+        <h3>AI-predicted escalation risk</h3>
+        <div id="riskChart"></div>
+        <div class="legend"><span><i style="background:var(--red)"></i>High ≥ 70%</span><span><i style="background:var(--amber)"></i>Medium 40–69%</span><span><i style="background:var(--green)"></i>Low</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- kpis -->
+  <div id="tk" class="hidden">
+    <div class="grid kpis" id="kpiCards" style="margin-bottom:16px"></div>
+    <div class="grid three">
+      <div class="card"><h3>Current value vs. target (% of 138 customers with continuity issues)</h3><div id="kpiChart"></div>
+        <div class="legend"><span><i style="background:var(--violet)"></i>Current (survey)</span><span><i style="background:var(--green)"></i>Target</span></div></div>
+      <div class="card"><h3><span class="ai-tag">AI</span> Alerts &amp; suggested management decisions</h3><div id="alerts"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CUSTOMER ================= -->
+<div id="cus" class="wrap hidden">
+  <div class="cust-wrap">
+    <div class="phone"><div class="screen">
+      <div class="app-head"><div class="nm">mystc</div><div class="sub">Track My Complaint</div></div>
+      <div class="app-body" id="app"></div>
+    </div></div>
+    <div class="card explain">
+      <h3>How the customer tracker works</h3>
+      <p>The tracker reads the <b>same data</b> as the employee dashboard, so the customer always sees the same status as the employee. Try it:</p>
+      <ul>
+        <li><b>On track</b> (green): shows the stage and the time remaining, e.g. “Resolution in 2 days”.</li>
+        <li><b>Overdue</b> (red): an SLA alert apologizes for the delay and lets the customer <b>escalate</b> or <b>contact technical support</b> with the ticket number visible.</li>
+        <li><b>Resolved</b> (blue): the customer rates the resolution from <b>1 to 5 stars</b>.</li>
+      </ul>
+      <p>Escalate a complaint or submit a rating here, then sign out and sign in as an <b>employee</b>: the action appears instantly in the complaint record, and the rating feeds the satisfaction indicator.</p>
+      <h3 style="margin-top:14px">Survey evidence behind this feature</h3>
+      <ul>
+        <li>91 of 187 complainants ranked the <b>current status</b> as the most important information when following up.</li>
+        <li>45.7% of customers with continuity issues found their complaint status unclear.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<footer class="footer">
+  <div class="in">
+    <div><h5>ContextCare – STC Complaint Context Continuity</h5>A prototype of the AI-powered Business Intelligence solution proposed in the case study “Analyzing Customer Context Continuity in Complaint Handling and Designing a Data Analytics and BI-Based Model for Decision Support: A Case Study of STC”.</div>
+    <div><h5>Project team</h5>Roaa Faleh Al-Ghamdi<br>Shatha Abdulrahim Al-Sulaimani<br>Sadeem Asiri<br>Munirah Al-Atwi</div>
+    <div><h5>Supervision</h5>Dr. Asmaa Ahmed<br>Department of Management Information Systems<br>Faculty of Business Administration<br>University of Tabuk</div>
+  </div>
+  <div class="copy"><span>© 2026 MIS Graduation Project Team – Roaa Al-Ghamdi, Shatha Al-Sulaimani, Sadeem Asiri and Munirah Al-Atwi. All rights reserved.</span><span>Academic prototype · sample data · not affiliated with or operated by stc</span></div>
+</footer>
+<div id="modal" class="modal-bg hidden"></div>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+const TODAY = new Date('2026-11-15T12:00:00');
+const STAGES = ['Complaint received','Under review','Transferred to responsible department','In progress','Resolved','Closed and rated'];
+const KPIS = [
+  {n:'Previously Submitted Information Repetition Rate',v:60.1,t:20,a:'Critical',d:'Activate reference-number lookup and auto-summary for all channels'},
+  {n:'Department-to-Department Transfer Difficulty Rate',v:52.9,t:20,a:'Critical',d:'Enable AI routing to reduce unnecessary transfers'},
+  {n:'Previous Complaint Action Unawareness Rate',v:47.8,t:15,a:'High',d:'Make the unified action record mandatory before any reply'},
+  {n:'Ambiguity Rate of Complaint Status',v:45.7,t:15,a:'High',d:'Push automatic status updates and SLA alerts to the mystc app'},
+  {n:'Staff-to-Staff Transfer Difficulty Rate',v:45.7,t:15,a:'High',d:'Require the complaint summary before any staff transfer'},
+  {n:'Information Repetition Rate',v:42.8,t:15,a:'High',d:'Show the auto-generated summary on the first screen for employees'}
+];
+function d(s){return new Date(s+'T12:00:00')}
+let C = [
+ {ref:'CMP-2026-004812',cust:'Sample Customer A',nid:'1XXXXXXXX1',mob:'0500000001',city:'Riyadh',svc:'Home Fiber 500 Mbps',issue:'Slow internet speed',dept:'Network Operations',aiDept:'Network Operations',pri:'High',risk:82,stage:3,opened:'2026-11-02',due:'2026-11-12',contacts:3,
+  nba:'Schedule cabinet maintenance and notify the customer proactively',
+  summary:'Customer reports fiber speed below 50 Mbps since 1 Nov. Router restarted and line test done by call center. Site visit confirmed weak signal (RSRP low). Escalated to Network Operations for cabinet maintenance. Customer must NOT be asked to re-explain the issue.',
+  log:[['2026-11-02 09:15','Complaint submitted','Call Center','Customer Service Rep.','Complaint registered, reference number sent by SMS. Router restart and remote line test done.',''],
+       ['2026-11-03 11:40','Diagnosis','Technical Support','Telecom Engineer','Site visit: weak signal (RSRP low). Technical report attached to the record.',''],
+       ['2026-11-04 14:05','Referral / escalation','Technical Support','Supervisor','Transferred with full summary and technical report.','Network Operations'],
+       ['2026-11-06 10:30','Follow-up','Call Center','Customer Service Rep.','Customer followed up. Employee read the summary – no re-explanation needed. Status shared.',''],
+       ['2026-11-09 16:20','Status update','Network Operations','Network Engineer','Cabinet maintenance scheduled. Status updated in mystc.','']]},
+ {ref:'CMP-2026-005127',cust:'Sample Customer B',nid:'1XXXXXXXX2',mob:'0500000002',city:'Jeddah',svc:'Postpaid Mobile',issue:'Incorrect billing charge',dept:'Billing Department',aiDept:'Billing Department',pri:'Medium',risk:35,stage:3,opened:'2026-11-10',due:'2026-11-17',contacts:1,
+  nba:'Approve refund using the attached usage records',
+  summary:'Customer disputes an international roaming charge of SAR 240 on the October bill. Usage records attached; customer was in Riyadh on the charged dates.',
+  log:[['2026-11-10 10:20','Complaint submitted','mystc app','Self-service','Complaint registered with bill screenshot attached.',''],
+       ['2026-11-11 09:30','Under review','Billing Department','Billing Specialist','Usage records retrieved and attached to the record.','']]},
+ {ref:'CMP-2026-005390',cust:'Sample Customer C',nid:'1XXXXXXXX3',mob:'0500000003',city:'Tabuk',svc:'Prepaid Mobile',issue:'Device connection drops',dept:'Customer Service',aiDept:'Customer Service',pri:'Low',risk:18,stage:5,opened:'2026-11-05',due:'2026-11-10',contacts:1,rating:4,
+  nba:'Confirm resolution with the customer and close',
+  summary:'Device lost data connection after a software update. APN settings were reset remotely and the connection was confirmed stable for 48 hours.',
+  log:[['2026-11-05 13:20','Complaint submitted','Chat','Customer Service Rep.','APN reset guided remotely.',''],
+       ['2026-11-08 16:05','Resolved','Customer Service','Customer Service Rep.','Connection stable for 48 hours. Customer notified by SMS and in mystc.',''],
+       ['2026-11-08 18:30','Closed and rated','mystc app','Customer','Customer rated the resolution 4 out of 5 stars.','']]},
+ {ref:'CMP-2026-005512',cust:'Sample Customer D',nid:'1XXXXXXXX4',mob:'0500000004',city:'Dammam',svc:'Postpaid Mobile',issue:'No mobile coverage at home',dept:'Call Center',aiDept:'Network Operations',pri:'High',risk:76,stage:1,opened:'2026-11-08',due:'2026-11-14',contacts:4,
+  nba:'Route directly to Network Operations with site data',
+  summary:'No 4G/5G coverage inside the customer’s home since 6 Nov. Customer has contacted STC 4 times. Neighbours report the same problem – possible site outage.',
+  log:[['2026-11-08 08:45','Complaint submitted','900 Call Center','Customer Service Rep.','Basic troubleshooting done, no improvement.',''],
+       ['2026-11-11 19:10','Follow-up','900 Call Center','Customer Service Rep.','Customer called again; summary read, no re-explanation requested.','']]},
+ {ref:'CMP-2026-005634',cust:'Sample Customer E',nid:'1XXXXXXXX5',mob:'0500000005',city:'Riyadh',svc:'Home Fiber 1 Gbps',issue:'Fiber installation delay',dept:'Call Center',aiDept:'Field Installation Team',pri:'Medium',risk:64,stage:2,opened:'2026-11-09',due:'2026-11-16',contacts:2,
+  nba:'Assign field team and share the visit time with the customer',
+  summary:'New fiber subscription paid on 1 Nov; installation appointment missed twice. Customer requests a confirmed visit time.',
+  log:[['2026-11-09 11:00','Complaint submitted','mystc app','Self-service','Complaint registered.',''],
+       ['2026-11-10 09:15','Under review','Call Center','Customer Service Rep.','Installation history checked: two missed appointments.','']]},
+ {ref:'CMP-2026-005701',cust:'Sample Customer F',nid:'1XXXXXXXX6',mob:'0500000006',city:'Makkah',svc:'Postpaid Mobile',issue:'Roaming package not activated',dept:'Technical Support',aiDept:'Billing Department',pri:'Medium',risk:58,stage:2,opened:'2026-11-12',due:'2026-11-18',contacts:2,
+  nba:'Transfer to Billing with the full summary attached',
+  summary:'Roaming package purchased on 11 Nov is not active; customer is travelling on 18 Nov.',
+  log:[['2026-11-12 15:40','Complaint submitted','Branch','Branch Agent','Payment receipt attached.','']]},
+ {ref:'CMP-2026-005788',cust:'Sample Customer G',nid:'1XXXXXXXX7',mob:'0500000007',city:'Madinah',svc:'Prepaid Mobile',issue:'Repeated call drops',dept:'Technical Support',aiDept:'Network Operations',pri:'High',risk:71,stage:3,opened:'2026-11-07',due:'2026-11-13',contacts:3,
+  nba:'Run signal diagnostics (RSRP, SINR) before transfer',
+  summary:'Calls drop after 1–2 minutes in the customer’s neighbourhood since 5 Nov. SIM replaced, problem persists.',
+  log:[['2026-11-07 10:05','Complaint submitted','900 Call Center','Customer Service Rep.','Complaint registered.',''],
+       ['2026-11-09 12:30','Diagnosis','Technical Support','Technician','SIM replaced at branch; issue persists.','']]},
+ {ref:'CMP-2026-005845',cust:'Sample Customer H',nid:'1XXXXXXXX8',mob:'0500000008',city:'Abha',svc:'Prepaid Mobile',issue:'SIM replacement request',dept:'Branch',aiDept:'Branch',pri:'Low',risk:22,stage:3,opened:'2026-11-13',due:'2026-11-17',contacts:1,
+  nba:'Complete the request in the branch without transfer',
+  summary:'Damaged SIM; replacement requested with the same number.',
+  log:[['2026-11-13 17:20','Complaint submitted','Branch','Branch Agent','Identity verified.','']]}
+];
+let current=null, custRef=null, ratingHover=0;
+const byRef=r=>C.find(c=>c.ref===r);
+const days=(a,b)=>Math.round((a-b)/86400000);
+function sla(c){
+  if(c.stage>=4) return {k:'resolved',label:'Resolved',cls:'p-blue',text:c.rating?'Resolved and rated':'Resolved'};
+  const left=days(d(c.due),TODAY);
+  if(left<0) return {k:'overdue',label:'Overdue '+(-left)+'d',cls:'p-red',left,text:'Overdue by '+(-left)+(-left===1?' day':' days')};
+  return {k:'ontrack',label:left===0?'Due today':left+'d left',cls:left<=1?'p-amber':'p-green',left,text:left===0?'Resolution expected today':'Resolution in '+left+(left===1?' day':' days')};
+}
+function riskCls(r){return r>=70?'p-red':r>=40?'p-amber':'p-green'}
+function riskCol(r){return r>=70?'var(--red)':r>=40?'var(--amber)':'var(--green)'}
+function fmt(s){const x=new Date(s.replace(' ','T'));return x.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+(s.length>10?', '+s.slice(11):'')}
+function now(){return '2026-11-15 '+new Date().toTimeString().slice(0,5)}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.remove('hidden');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.add('hidden'),2600)}
+
+function setView(v){
+  document.getElementById('emp').classList.toggle('hidden',v!=='emp');
+  document.getElementById('cus').classList.toggle('hidden',v!=='cus');
+  document.getElementById('vEmp').classList.toggle('on',v==='emp');
+  document.getElementById('vCus').classList.toggle('on',v==='cus');
+  if(v==='emp'){renderAll()} else {renderApp()}
+}
+function tab(b){
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  ['t360','tq','tk'].forEach(id=>document.getElementById(id).classList.toggle('hidden',id!==b.dataset.t));
+}
+
+/* ---------- employee 360 ---------- */
+function lookup(){
+  const v=document.getElementById('ref').value.trim().toUpperCase();
+  const c=byRef(v);
+  if(!c){document.getElementById('c360').innerHTML='<div class="card"><b style="color:var(--red)">No complaint found for “'+v+'”.</b> <span class="muted">Try one of the suggested reference numbers.</span></div>';return}
+  current=c.ref; render360();
+}
+function gaugeSVG(p,col){
+  const r=70,cx=90,cy=86,a=Math.PI*(1-p/100);
+  const x=cx+r*Math.cos(a), y=cy-r*Math.sin(a);
+  return `<svg width="180" height="110" viewBox="0 0 180 110"><path d="M20 86 A70 70 0 0 1 160 86" fill="none" stroke="#ECE7F5" stroke-width="16" stroke-linecap="round"/>
+  <path d="M20 86 A70 70 0 0 1 ${x.toFixed(1)} ${y.toFixed(1)}" fill="none" stroke="${col}" stroke-width="16" stroke-linecap="round"/>
+  <text x="90" y="82" text-anchor="middle" font-size="26" font-weight="800" fill="#1B1030">${p}%</text></svg>`;
+}
+function render360(){
+  const c=byRef(current); if(!c){document.getElementById('c360').innerHTML='';return}
+  const s=sla(c);
+  const statusTxt=c.stage>=5?'Closed and rated':c.stage===4?'Resolved':STAGES[c.stage];
+  const rows=c.log.slice().reverse().map(l=>`<div class="ev ${l[1].includes('scalat')?'esc':''} ${l[2]==='mystc app'?'cust':''}"><div class="t">${fmt(l[0])} · ${l[2]} · ${l[3]}</div><div class="h">${l[1]}${l[5]?' → '+l[5]:''}</div><div>${l[4]}</div></div>`).join('');
+  document.getElementById('c360').innerHTML=`
+  <div class="grid status-strip" style="margin-bottom:16px">
+    <div class="mini"><div class="l">Complaint status</div><div class="v">${statusTxt}</div></div>
+    <div class="mini"><div class="l">Currently handled by</div><div class="v">${c.dept}</div></div>
+    <div class="mini"><div class="l">Priority</div><div class="v"><span class="pill ${c.pri==='High'?'p-red':c.pri==='Medium'?'p-amber':'p-green'}">${c.pri}</span></div></div>
+    <div class="mini"><div class="l">Days open · times customer contacted</div><div class="v">${days(TODAY,d(c.opened))} days · ${c.contacts}×</div></div>
+    <div class="mini"><div class="l">SLA (expected ${fmt(c.due)})</div><div class="v"><span class="pill ${s.cls}">${s.text}</span></div></div>
+  </div>
+  <div class="grid two">
+    <div class="grid" style="align-content:start">
+      <div class="card"><h3>Customer information</h3>
+        <div class="info">
+          <div class="mini"><div class="l">Name</div><div class="v">${c.cust}</div></div>
+          <div class="mini"><div class="l">National ID</div><div class="v">${c.nid}</div></div>
+          <div class="mini"><div class="l">Mobile</div><div class="v">${c.mob}</div></div>
+          <div class="mini"><div class="l">City</div><div class="v">${c.city}</div></div>
+          <div class="mini"><div class="l">Service</div><div class="v">${c.svc}</div></div>
+          <div class="mini"><div class="l">Issue type</div><div class="v">${c.issue}</div></div>
+        </div>
+        ${c.rating?`<div class="mini" style="margin-top:8px"><div class="l">Customer rating (from mystc)</div><div class="v" style="color:#E0A000">${'★'.repeat(c.rating)}${'☆'.repeat(5-c.rating)} ${c.rating}/5</div></div>`:''}
+      </div>
+      <div class="card"><h3><span class="ai-tag">AI</span> Decision support</h3>
+        <div class="gauge">${gaugeSVG(c.risk,riskCol(c.risk))}<div class="muted" style="font-size:12px">Predicted escalation risk</div></div>
+        <div class="mini" style="margin-top:10px"><div class="l">AI recommended department</div><div class="v">${c.aiDept} ${c.aiDept!==c.dept?'<span class="pill p-amber">Re-route suggested</span>':'<span class="pill p-green">Correct team</span>'}</div></div>
+        <div class="mini" style="margin-top:8px"><div class="l">Next best action</div><div class="v" style="font-size:13.5px">${c.nba}</div></div>
+      </div>
+    </div>
+    <div class="grid" style="align-content:start">
+      <div class="summary"><div class="row" style="margin-bottom:6px"><span class="ai-tag">AI</span><b>Auto-generated complaint summary</b><span class="muted" style="font-size:11.5px">shown to every employee who opens this reference number</span></div>${c.summary}</div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between;margin-bottom:12px">
+          <h3 style="margin:0">Unified record of previous actions &amp; transfer history</h3>
+          <div class="row">
+            <button class="btn sec" onclick="openNote()" ${c.stage>=4?'disabled':''}>+ Add action</button>
+            <button class="btn" onclick="openTransfer()" ${c.stage>=4?'disabled':''}>Transfer with summary</button>
+            <button class="btn green" onclick="resolveC()" ${c.stage>=4?'disabled':''}>Mark resolved</button>
+          </div>
+        </div>
+        <div class="timeline">${rows}</div>
+      </div>
+    </div>
+  </div>`;
+}
+function modal(html){const m=document.getElementById('modal');m.innerHTML='<div class="modal">'+html+'</div>';m.classList.remove('hidden')}
+function closeModal(){document.getElementById('modal').classList.add('hidden')}
+function openNote(){modal(`<h4>Add action to the unified record</h4><label>Action taken</label><textarea id="nTxt" rows="3" placeholder="Describe what was done…"></textarea>
+ <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn sec" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveNote()">Save action</button></div>`)}
+function saveNote(){const t=document.getElementById('nTxt').value.trim();if(!t)return;const c=byRef(current);
+ c.log.push([now(),'Action recorded',c.dept,'You (employee)',t,'']);closeModal();render360();toast('Action saved – visible to every employee')}
+function openTransfer(){const c=byRef(current);const depts=['Network Operations','Billing Department','Technical Support','Field Installation Team','Customer Service','Call Center','Branch'].filter(x=>x!==c.dept);
+ modal(`<h4>Transfer complaint with full context</h4><p class="muted" style="font-size:12.5px">The summary and action history travel with the complaint, so the receiving team does not need to ask the customer again.</p>
+ <label>Transfer to</label><select id="tDept">${depts.map(x=>`<option ${x===c.aiDept?'selected':''}>${x}</option>`).join('')}</select>
+ <label>Reason for transfer (required)</label><textarea id="tWhy" rows="3" placeholder="Why is this complaint being transferred?"></textarea>
+ <p style="font-size:12px;margin-top:8px"><span class="ai-tag">AI</span> Recommended: <b>${c.aiDept}</b></p>
+ <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn sec" onclick="closeModal()">Cancel</button><button class="btn" onclick="doTransfer()">Transfer</button></div>`)}
+function doTransfer(){const c=byRef(current);const to=document.getElementById('tDept').value, why=document.getElementById('tWhy').value.trim();
+ if(!why){toast('Please write the reason for transfer');return}
+ c.log.push([now(),'Referral / escalation',c.dept,'You (employee)',why+' (summary and history attached)',to]);c.dept=to;if(c.stage<2)c.stage=2;closeModal();render360();toast('Transferred to '+to+' with full context')}
+function resolveC(){const c=byRef(current);c.stage=4;c.log.push([now(),'Resolved',c.dept,'You (employee)','Complaint resolved. Customer notified by SMS and in mystc; rating requested.','']);render360();renderQueue();toast('Resolved – the customer can now rate it in mystc')}
+
+/* ---------- queue ---------- */
+function renderQueue(){
+  const open=C.slice().sort((a,b)=>b.risk-a.risk);
+  document.getElementById('qBody').innerHTML=open.map(c=>{const s=sla(c);return `<tr class="click" onclick="go('${c.ref}')"><td><b>${c.ref}</b></td><td>${c.issue}</td><td>${c.dept}</td><td>${c.aiDept}${c.aiDept!==c.dept?' <span class="pill p-amber">re-route</span>':''}</td><td><span class="pill ${riskCls(c.risk)}">${c.risk}%</span></td><td><span class="pill ${s.cls}">${s.label}</span></td></tr>`}).join('');
+  const w=330,bh=24,g=9;
+  document.getElementById('riskChart').innerHTML=`<svg width="100%" viewBox="0 0 ${w} ${open.length*(bh+g)}">${open.map((c,i)=>{const y=i*(bh+g),bw=(w-150)*c.risk/100;
+   return `<text x="0" y="${y+16}" font-size="11" fill="#6B6280">${c.ref.slice(4)}</text><rect x="110" y="${y+3}" width="${w-150}" height="${bh-6}" rx="6" fill="#F0ECF7"/><rect x="110" y="${y+3}" width="${bw}" height="${bh-6}" rx="6" fill="${riskCol(c.risk)}"/><text x="${116+bw}" y="${y+16}" font-size="11" font-weight="700" fill="#1B1030">${c.risk}%</text>`}).join('')}</svg>`;
+}
+function go(r){current=r;document.getElementById('ref').value=r;tab(document.querySelector('[data-t=t360]'));render360();window.scrollTo(0,0)}
+
+/* ---------- KPIs ---------- */
+function renderKPI(){
+  const rated=C.filter(c=>c.rating), avg=rated.length?(rated.reduce((a,c)=>a+c.rating,0)/rated.length).toFixed(1):'–';
+  document.getElementById('kpiCards').innerHTML=KPIS.map(k=>`<div class="card kpi" style="border-color:${k.a==='Critical'?'var(--red)':'var(--amber)'}"><div class="lbl">${k.n}</div><div class="val">${k.v}%</div><div class="tgt">Target ≤ ${k.t}% · <span class="pill ${k.a==='Critical'?'p-red':'p-amber'}">${k.a}</span></div></div>`).join('');
+  const W=640,rowH=44;
+  document.getElementById('kpiChart').innerHTML=`<svg width="100%" viewBox="0 0 ${W} ${KPIS.length*rowH+10}">${KPIS.map((k,i)=>{const y=i*rowH,sc=(W-290)/70;
+    return `<text x="0" y="${y+16}" font-size="11.5" fill="#1B1030">${k.n.replace(' Rate','')}</text>
+    <rect x="270" y="${y+4}" width="${k.v*sc}" height="15" rx="4" fill="#7B2FF7"/><text x="${276+k.v*sc}" y="${y+16}" font-size="11.5" font-weight="700">${k.v}%</text>
+    <rect x="270" y="${y+22}" width="${k.t*sc}" height="10" rx="4" fill="#1FA971"/><text x="${276+k.t*sc}" y="${y+31}" font-size="10.5" fill="#1FA971">${k.t}%</text>`}).join('')}</svg>`;
+  const overdue=C.filter(c=>sla(c).k==='overdue'), reroute=C.filter(c=>c.stage<4&&c.aiDept!==c.dept), hi=C.filter(c=>c.stage<4&&c.risk>=70);
+  document.getElementById('alerts').innerHTML=
+   KPIS.filter(k=>k.a==='Critical').map(k=>`<div class="alert c"><b>Critical</b><div>${k.n} is ${k.v}% (target ${k.t}%).<br><b>Decision:</b> ${k.d}</div></div>`).join('')+
+   `<div class="alert h"><b>SLA</b><div>${overdue.length} complaint(s) overdue: ${overdue.map(c=>c.ref.slice(4)).join(', ')||'none'}. Customers have received an apology alert in mystc.</div></div>`+
+   `<div class="alert h"><b>Risk</b><div>${hi.length} open complaint(s) with escalation risk ≥ 70%. Prioritize them today.</div></div>`+
+   `<div class="alert i"><b>Routing</b><div>${reroute.length} complaint(s) are with the wrong team. AI suggests re-routing to avoid another transfer.</div></div>`+
+   `<div class="alert i"><b>CSAT</b><div>Average customer rating from mystc: <b>${avg}/5</b> (${rated.length} rated).</div></div>`;
+}
+function renderAll(){renderQueue();renderKPI();render360()}
+
+/* ---------- customer app ---------- */
+function renderApp(){
+  const a=document.getElementById('app');
+  if(!custRef){
+    a.innerHTML=`<div class="mcard"><b>My complaints</b><p class="muted" style="font-size:12px;margin:4px 0 8px">Welcome ${session?session.name:''}. Choose a complaint to track it.</p>
+     <div class="mlist">${C.filter(c=>!session||session.role!=='cus'||session.refs.includes(c.ref)).map(c=>{const s=sla(c);return `<div class="itm" onclick="custRef='${c.ref}';renderApp()"><div><b style="font-size:13px">${c.issue}</b><div class="muted" style="font-size:11.5px">${c.ref}</div></div><span class="pill ${s.cls}">${s.k==='overdue'?'Overdue':s.k==='resolved'?'Resolved':'On track'}</span></div>`}).join('')}</div></div>`;
+    return;
+  }
+  const c=byRef(custRef), s=sla(c), prog=Math.round(Math.min(c.stage+1,6)/6*100);
+  const banner = s.k==='overdue'
+   ? `<div class="banner b-red">⚠ Your complaint is overdue. We apologize for this delay.<small>Expected resolution was ${fmt(c.due)}. You can escalate it or contact technical support below.</small></div>`
+   : s.k==='resolved' ? `<div class="banner b-blue">✓ Your complaint has been resolved.<small>Thank you for your patience. Please rate your experience.</small></div>`
+   : `<div class="banner b-green">✓ Your complaint is on track.<small>It is being handled within the expected resolution time.</small></div>`;
+  const stg=STAGES.map((n,i)=>{let cls='d-pend',sym=i+1,extra='';
+    if(i<c.stage||(c.stage>=5&&i<=5)||(i===4&&c.stage>=4)){cls='d-done';sym='✓'}
+    else if(i===c.stage){cls=s.k==='overdue'?'d-late':'d-cur';extra=s.k==='overdue'?' <span class="pill p-red">Delayed</span>':' <span class="pill p-amber">Current</span>'}
+    if(i===2&&i<=c.stage) n='Transferred to '+(c.dept);
+    return `<li><span class="dot ${cls}">${sym}</span><div><b>${n}</b>${extra}</div></li>`}).join('');
+  const escalated=c.log.some(l=>l[2]==='mystc app'&&l[1].includes('scalat'));
+  a.innerHTML=`<div style="margin-bottom:10px"><a href="#" onclick="custRef=null;renderApp();return false" style="color:var(--violet);font-weight:700;text-decoration:none;font-size:13px">‹ My complaints</a></div>
+   ${banner}
+   <div class="mcard"><div class="muted" style="font-size:11.5px">Ticket number</div><div style="font-weight:800;font-size:16px;color:var(--purple)">${c.ref}</div>
+     <div style="margin-top:6px;font-size:13px">${c.issue}</div>
+     <div class="row" style="margin-top:10px;justify-content:space-between"><div><div class="muted" style="font-size:11.5px">Handled by</div><b style="font-size:13px">${c.dept}</b></div>
+     <div style="text-align:right"><div class="muted" style="font-size:11.5px">${s.k==='resolved'?'Status':'Time to resolution'}</div><div class="count" style="color:${s.k==='overdue'?'var(--red)':s.k==='resolved'?'var(--blue)':'var(--green)'};font-size:18px">${s.text}</div></div></div>
+     <div class="bar" style="margin-top:10px"><span style="width:${prog}%;background:${s.k==='overdue'?'var(--red)':s.k==='resolved'?'var(--blue)':'var(--green)'}"></span></div><div class="muted" style="font-size:11px;margin-top:4px">${prog}% complete</div></div>
+   <div class="mcard"><b style="font-size:13px">Progress</b><ul class="stages" style="margin-top:6px">${stg}</ul></div>
+   ${s.k==='resolved'
+     ? `<div class="mcard" style="text-align:center"><b style="font-size:13px">Rate the resolution</b>
+        <div class="stars" id="stars">${[1,2,3,4,5].map(i=>`<span data-i="${i}" class="${(c.rating||0)>=i?'on':''}" onmouseover="hov(${i})" onmouseout="hov(0)" onclick="rate(${i})">★</span>`).join('')}</div>
+        <div class="muted" style="font-size:12px">${c.rating?'You rated '+c.rating+' / 5 – thank you for your feedback':'Tap a star (1 = poor, 5 = excellent)'}</div></div>`
+     : `<div class="mcard"><b style="font-size:13px">Need help?</b><div class="muted" style="font-size:12px;margin:4px 0 10px">Your ticket number is shared automatically – no need to explain again.</div>
+        <div class="row">${s.k==='overdue'?`<button class="btn pink" ${escalated?'disabled':''} onclick="escalate()">${escalated?'Escalated ✓':'Escalate complaint'}</button>`:''}
+        <button class="btn sec" onclick="support()">Contact technical support</button></div></div>`}`;
+}
+function hov(i){document.querySelectorAll('#stars span').forEach(s=>s.classList.toggle('on',i?+s.dataset.i<=i:+s.dataset.i<=(byRef(custRef).rating||0)))}
+function rate(i){const c=byRef(custRef);c.rating=i;c.stage=5;
+  const msg='Customer rated the resolution '+i+' out of 5 stars.';const ex=c.log.find(l=>l[1]==='Closed and rated');if(ex){ex[4]=msg;ex[0]=now()}else c.log.push([now(),'Closed and rated','mystc app','Customer',msg,'']);
+  renderApp();toast('Thank you! Rating sent to STC')}
+function escalate(){const c=byRef(custRef);c.log.push([now(),'Customer escalation','mystc app','Customer','Customer escalated the overdue complaint from mystc. Supervisor notified.','Supervisor']);
+  c.contacts++;c.risk=Math.min(99,c.risk+8);renderApp();toast('Escalated – a supervisor has been notified with ticket '+c.ref)}
+function support(){const c=byRef(custRef);
+  modal(`<h4>Contact technical support</h4><p style="font-size:13px">Ticket <b>${c.ref}</b> is attached to your request, so the agent already sees your complaint summary and history.</p>
+  <label>Preferred channel</label><select id="ch"><option>Call me back</option><option>Live chat</option><option>WhatsApp</option></select>
+  <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn sec" onclick="closeModal()">Cancel</button><button class="btn" onclick="sendSup()">Send request</button></div>`)}
+function sendSup(){const c=byRef(custRef),ch=document.getElementById('ch').value;c.log.push([now(),'Support request','mystc app','Customer','Customer requested technical support ('+ch+') from mystc.','']);c.contacts++;closeModal();toast('Request sent – ticket '+c.ref+' attached')}
+
+
+const ACC={
+ emp:{'emp1001':{pw:'1234',name:'Ahmed Al-Harbi',role:'Complaints Team Supervisor'},'emp1002':{pw:'1234',name:'Nora Al-Qahtani',role:'Customer Service Representative'}},
+ cus:{'0500000001':{pw:'1234',name:'Sample Customer A',refs:['CMP-2026-004812']},'0500000004':{pw:'1234',name:'Sample Customer D',refs:['CMP-2026-005512']},
+      '0500000002':{pw:'1234',name:'Sample Customer B',refs:['CMP-2026-005127']},'0500000003':{pw:'1234',name:'Sample Customer C',refs:['CMP-2026-005390']}}
+};
+let role='emp', session=null;
+function go2(p,arg){
+  ['home','login','emp','cus'].forEach(id=>document.getElementById(id).classList.toggle('hidden',id!==p));
+  document.querySelector('.footer').classList.toggle('hidden',p==='login');
+  if(p==='login'){setRole(arg||role);document.getElementById('uName').focus()}
+  if(p==='home'&&arg){setTimeout(()=>document.getElementById(arg).scrollIntoView({behavior:'smooth'}),30)} else window.scrollTo(0,0);
+}
+function setRole(r){role=r;document.getElementById('rEmp').classList.toggle('on',r==='emp');document.getElementById('rCus').classList.toggle('on',r==='cus');
+  document.getElementById('uLbl').textContent=r==='emp'?'Employee ID':'Mobile number';
+  document.getElementById('uName').placeholder=r==='emp'?'e.g. emp1001':'e.g. 0500000001';
+  document.getElementById('lErr').textContent='';
+  const a=ACC[r];document.getElementById('demoAcc').innerHTML='<b>Sample accounts</b> – click one to sign in:<br>'+
+   Object.entries(a).map(([k,v])=>`<code onclick="fillAcc('${k}')">${k}</code> ${v.name}${v.role?' · '+v.role:''}${v.refs?' · '+v.refs[0].slice(4):''}`).join('<br>');}
+function fillAcc(k){document.getElementById('uName').value=k;doLogin()}
+function quickDemo(){fillAcc(role==='emp'?'emp1001':'0500000004')}
+function doLogin(){
+  const u=document.getElementById('uName').value.trim();
+  const acc=ACC[role][u];
+  if(!u){document.getElementById('lErr').textContent='Please enter your '+(role==='emp'?'employee ID':'mobile number')+'.';return}
+  if(!acc){document.getElementById('lErr').textContent='This '+(role==='emp'?'employee ID':'mobile number')+' is not one of the sample accounts.';return}
+  session={role,id:u,...acc};
+  document.getElementById('navPublic').classList.add('hidden');document.getElementById('navPrivate').classList.remove('hidden');
+  document.getElementById('uNm').textContent=acc.name;document.getElementById('uRl').textContent=role==='emp'?acc.role:'mystc customer · '+u;
+  document.getElementById('uAv').textContent=acc.name.split(' ').map(x=>x[0]).slice(0,2).join('');
+  if(role==='emp'){go2('emp');renderAll()} else {custRef=acc.refs.length===1?acc.refs[0]:null;go2('cus');renderApp()}
+  setHash(role==='emp'?'employee':'customer');
+  toast('Signed in as '+acc.name);
+}
+function logout(){session=null;setHash('home');document.getElementById('navPublic').classList.remove('hidden');document.getElementById('navPrivate').classList.add('hidden');go2('home');toast('Signed out')}
+
+
+function setHash(h){try{if(location.hash!=='#'+h)history.replaceState(null,'','#'+h)}catch(e){}}
+function nav(r,anchor){document.body.classList.remove('menu-open');
+  if(r==='employee'||r==='customer'){const want=r==='employee'?'emp':'cus';
+    if(session&&session.role===want){go2(want);want==='emp'?renderAll():renderApp();setHash(r);return}
+    if(session)logout();
+    role=want;go2('login',want);setHash(r);return}
+  if(r==='login'){go2('login');setHash('login');return}
+  go2('home',anchor);setHash('home');}
+function route(){const h=(location.hash||'').replace('#','');
+  if(h==='employee'||h==='customer'||h==='login')nav(h); else nav('home');}
+window.addEventListener('hashchange',route);
+
+/* ---------- init ---------- */
+document.getElementById('refs').innerHTML=C.map(c=>`<option value="${c.ref}">${c.issue}</option>`).join('');
+document.getElementById('ref').value='CMP-2026-004812';current='CMP-2026-004812';
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+route();
+</script>
+</body>
+</html>
