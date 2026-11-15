@@ -303,17 +303,18 @@ tr.click{cursor:pointer}tr.click:hover td{background:#F7F2FF}
       <p>Employees open the unified complaint dashboard. Customers open their complaint tracker in mystc. Both use the same complaint data.</p>
     </div>
     <div class="login-box"><div class="lform">
-      <h3>Sign in to the prototype</h3><div class="muted">Choose a role, then enter a sample ID or use quick demo</div>
+      <h3>Sign in to the prototype</h3><div class="muted">Choose a role, then enter your ID and password</div>
       <div class="role">
         <button id="rEmp" class="on" onclick="setRole('emp')"><b>Employee</b>STC staff and supervisors</button>
         <button id="rCus" onclick="setRole('cus')"><b>Customer</b>Track my complaint</button>
       </div>
-      <div class="field"><label id="uLbl">Employee ID</label><input id="uName" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="field"><label id="uLbl">Employee ID</label><input id="uName" autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('uPw').focus()"></div>
+      <div class="field"><label>Password</label><div style="position:relative"><input id="uPw" type="password" autocomplete="off" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:64px"><button type="button" onclick="const i=document.getElementById('uPw');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'Show':'Hide'" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--violet);font-weight:600;font-size:12.5px;cursor:pointer">Show</button></div></div>
             <div class="err" id="lErr"></div>
       <button class="btn lg" style="width:100%" onclick="doLogin()">Continue</button>
       <button class="btn sec lg" style="width:100%;margin-top:10px" onclick="quickDemo()">Quick demo – continue with a sample account</button>
       <div class="demo-acc" id="demoAcc"></div>
-      <div class="notice">Academic prototype with sample data only. No real accounts or passwords are used, and this is not an official stc service.</div>
+      <div class="notice">Academic prototype with sample data only. Sample IDs and passwords are for demonstration only, and this is not an official stc service.</div>
     </div></div>
   </div>
 </div>
@@ -644,9 +645,9 @@ function sendSup(){const c=byRef(custRef),ch=document.getElementById('ch').value
 
 
 const ACC={
- emp:{'emp1001':{pw:'1234',name:'Ahmed Al-Harbi',role:'Complaints Team Supervisor'},'emp1002':{pw:'1234',name:'Nora Al-Qahtani',role:'Customer Service Representative'}},
- cus:{'0500000001':{pw:'1234',name:'Sample Customer A',refs:['CMP-2026-004812']},'0500000004':{pw:'1234',name:'Sample Customer D',refs:['CMP-2026-005512']},
-      '0500000002':{pw:'1234',name:'Sample Customer B',refs:['CMP-2026-005127']},'0500000003':{pw:'1234',name:'Sample Customer C',refs:['CMP-2026-005390']}}
+ emp:{'emp1001':{pw:'Emp@2026',name:'Ahmed Al-Harbi',role:'Complaints Team Supervisor'},'emp1002':{pw:'Emp@2026',name:'Nora Al-Qahtani',role:'Customer Service Representative'}},
+ cus:{'0500000001':{pw:'Cus@2026',name:'Sample Customer A',refs:['CMP-2026-004812']},'0500000004':{pw:'Cus@2026',name:'Sample Customer D',refs:['CMP-2026-005512']},
+      '0500000002':{pw:'Cus@2026',name:'Sample Customer B',refs:['CMP-2026-005127']},'0500000003':{pw:'Cus@2026',name:'Sample Customer C',refs:['CMP-2026-005390']}}
 };
 let role='emp', session=null;
 function go2(p,arg){
@@ -658,16 +659,20 @@ function go2(p,arg){
 function setRole(r){role=r;document.getElementById('rEmp').classList.toggle('on',r==='emp');document.getElementById('rCus').classList.toggle('on',r==='cus');
   document.getElementById('uLbl').textContent=r==='emp'?'Employee ID':'Mobile number';
   document.getElementById('uName').placeholder=r==='emp'?'e.g. emp1001':'e.g. 0500000001';
-  document.getElementById('lErr').textContent='';
-  const a=ACC[r];document.getElementById('demoAcc').innerHTML='<b>Sample accounts</b> – click one to sign in:<br>'+
+  document.getElementById('lErr').textContent='';document.getElementById('uPw').value='';
+  const a=ACC[r];document.getElementById('demoAcc').innerHTML='<b>Sample accounts</b> – password <code>'+(r==='emp'?'Emp@2026':'Cus@2026')+'</code> · click one to sign in:<br>'+
    Object.entries(a).map(([k,v])=>`<code onclick="fillAcc('${k}')">${k}</code> ${v.name}${v.role?' · '+v.role:''}${v.refs?' · '+v.refs[0].slice(4):''}`).join('<br>');}
-function fillAcc(k){document.getElementById('uName').value=k;doLogin()}
+function fillAcc(k){document.getElementById('uName').value=k;document.getElementById('uPw').value=ACC[role][k].pw;doLogin()}
 function quickDemo(){fillAcc(role==='emp'?'emp1001':'0500000004')}
 function doLogin(){
   const u=document.getElementById('uName').value.trim();
   const acc=ACC[role][u];
   if(!u){document.getElementById('lErr').textContent='Please enter your '+(role==='emp'?'employee ID':'mobile number')+'.';return}
   if(!acc){document.getElementById('lErr').textContent='This '+(role==='emp'?'employee ID':'mobile number')+' is not one of the sample accounts.';return}
+  const pw=document.getElementById('uPw').value;
+  if(!pw){document.getElementById('lErr').textContent='Please enter your password.';return}
+  if(pw!==acc.pw){document.getElementById('lErr').textContent='Incorrect password. Please try again.';document.getElementById('uPw').value='';return}
+  document.getElementById('uPw').value='';
   session={role,id:u,...acc};
   document.getElementById('navPublic').classList.add('hidden');document.getElementById('navPrivate').classList.remove('hidden');
   document.getElementById('uNm').textContent=acc.name;document.getElementById('uRl').textContent=role==='emp'?acc.role:'mystc customer · '+u;
